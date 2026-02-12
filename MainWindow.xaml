@@ -1,0 +1,823 @@
+﻿<Window x:Class="EngineeringCalculator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:EngineeringCalculator"
+        Title="Инженерный калькулятор" Height="578" Width="355"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanMinimize"
+        Background="Transparent"
+        AllowsTransparency="True">
+
+    <Window.Resources>
+        <local:BoolToDegRadConverter x:Key="BoolToDegRadConverter"/>
+
+        <!-- Тень для окна -->
+        <DropShadowEffect x:Key="WindowShadow" Color="#000000" ShadowDepth="2" BlurRadius="15" Opacity="0.5"/>
+
+        <!-- Стили для кнопок управления окном -->
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                BorderBrush="#4a5f6b"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#34495e"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#566573"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2c3e50"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ОДИНАКОВАЯ ЦВЕТОВАЯ ГАММА ДЛЯ ВСЕХ РЕЖИМОВ -->
+
+        <!-- Основной стиль для кнопок -->
+        <Style x:Key="ModernButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="26"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                BorderBrush="#3498db"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#566573"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#35434b"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для кнопок цифр -->
+        <Style x:Key="NumberButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="#1f282d"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="FontSize" Value="26"/>
+        </Style>
+
+        <!-- Стиль для светлых кнопок -->
+        <Style x:Key="LightGrayButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="FontSize" Value="22"/>
+        </Style>
+
+        <!-- Стиль для оранжевых операторов -->
+        <Style x:Key="OperatorButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="#FF9500"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="26"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <!-- Стиль для кнопки равно -->
+        <Style x:Key="EqualButtonStyle" TargetType="Button" BasedOn="{StaticResource OperatorButtonStyle}">
+            <Setter Property="Background" Value="#FF9500"/>
+        </Style>
+
+        <!-- Стиль для функциональных кнопок -->
+        <Style x:Key="FunctionButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#3498db"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Стиль для кнопок констант -->
+        <Style x:Key="ConstantButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#e74c3c"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- СТИЛЬ ДЛЯ МАЛЕНЬКИХ КНОПОК (ИНЖЕНЕРНЫЙ РЕЖИМ) - ТА ЖЕ ЦВЕТОВАЯ ГАММА -->
+        <Style x:Key="SmallButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Margin" Value="0.5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                BorderBrush="#3498db"
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#566573"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#35434b"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для МАЛЕНЬКИХ кнопок цифр -->
+        <Style x:Key="SmallNumberButtonStyle" TargetType="Button" BasedOn="{StaticResource SmallButtonStyle}">
+            <Setter Property="Background" Value="#1f282d"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <!-- Стиль для МАЛЕНЬКИХ функциональных кнопок -->
+        <Style x:Key="SmallFunctionButtonStyle" TargetType="Button" BasedOn="{StaticResource SmallButtonStyle}">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#3498db"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Стиль для МАЛЕНЬКИХ кнопок констант -->
+        <Style x:Key="SmallConstantButtonStyle" TargetType="Button" BasedOn="{StaticResource SmallButtonStyle}">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#e74c3c"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- Стиль для МАЛЕНЬКИХ операторов -->
+        <Style x:Key="SmallOperatorButtonStyle" TargetType="Button" BasedOn="{StaticResource SmallButtonStyle}">
+            <Setter Property="Background" Value="#FF9500"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- Стиль для МАЛЕНЬКОЙ кнопки равно -->
+        <Style x:Key="SmallEqualButtonStyle" TargetType="Button" BasedOn="{StaticResource SmallOperatorButtonStyle}">
+            <Setter Property="Background" Value="#FF9500"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+
+        <!-- Стиль для TextBox -->
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#151b1e"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="BorderBrush" Value="#2a363c"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для ToggleButton -->
+        <Style x:Key="RoundedToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3498db"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#34495e"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2c3e50"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для TabControl -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="#151b1e"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="TabStripPlacement" Value="Top"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#7f8c8d"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid>
+                            <Border x:Name="border" 
+                                    Background="{TemplateBinding Background}"
+                                    BorderThickness="0"
+                                    CornerRadius="3"
+                                    Margin="5,0">
+                                <ContentPresenter x:Name="contentPresenter"
+                                              ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="#3498db"/>
+                                <Setter TargetName="border" Property="Background" Value="#2a363c"/>
+                                <Setter TargetName="contentPresenter" Property="TextElement.FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1f282d"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для красивых ToolTip'ов -->
+        <Style TargetType="ToolTip">
+            <Setter Property="Background" Value="#2a363c"/>
+            <Setter Property="Foreground" Value="#ecf0f1"/>
+            <Setter Property="BorderBrush" Value="#3498db"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="HasDropShadow" Value="True"/>
+            <Setter Property="ToolTipService.InitialShowDelay" Value="250"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="5000"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Основной контейнер -->
+    <Border Background="#1f282d" CornerRadius="8" MouseDown="Border_MouseDown">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="#000000" Opacity="0.5"/>
+        </Border.Effect>
+
+        <Grid>
+            <!-- Заголовок -->
+            <Border Background="#151b1e" Height="30" VerticalAlignment="Top" CornerRadius="8,8,0,0">
+                <Grid>
+                    <TextBlock Text="ИНЖЕНЕРНЫЙ КАЛЬКУЛЯТОР" Foreground="White" VerticalAlignment="Center"
+                               Margin="12,0,0,0" FontSize="13" FontWeight="SemiBold"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="─" Width="30" Background="Transparent" Foreground="White" 
+                                BorderThickness="0" FontSize="11" Click="MinimizeButton_Click"
+                                Style="{StaticResource SidebarButtonStyle}"
+                                ToolTip="Свернуть"/>
+                        <Button Content="✕" Width="30" Background="Transparent" Foreground="White" 
+                                BorderThickness="0" FontSize="11" Click="CloseButton_Click"
+                                Style="{StaticResource SidebarButtonStyle}"
+                                ToolTip="Закрыть"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Разделитель между заголовком и основным контентом -->
+            <Border Background="#000000" Height="1" VerticalAlignment="Top" Margin="0,30,0,0"/>
+
+            <!-- Основное содержимое -->
+            <Grid Margin="0,31,0,0">
+                <TabControl>
+                    <!-- БАЗОВЫЙ РЕЖИМ -->
+                    <TabItem Header="Базовый">
+                        <Grid Background="#1f282d">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="160"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Область дисплея -->
+                            <Border Grid.Row="0" Background="#151b1e" Padding="20" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- История -->
+                                    <TextBlock x:Name="HistoryTextBlock" 
+                                             Grid.Row="0"
+                                             FontSize="18" 
+                                             Foreground="#7f8c8d" 
+                                             TextAlignment="Right"
+                                             HorizontalAlignment="Stretch"
+                                             VerticalAlignment="Bottom"
+                                             Margin="0,0,0,5"
+                                             Height="25"/>
+
+                                    <!-- Основной дисплей -->
+                                    <Border Grid.Row="1" 
+                                          Background="Transparent" 
+                                          BorderThickness="0"
+                                          Padding="0">
+                                        <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                                                    VerticalScrollBarVisibility="Disabled"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock x:Name="DisplayTextBlock" 
+                                                     FontSize="48" 
+                                                     Foreground="#ecf0f1" 
+                                                     TextAlignment="Right"
+                                                     Text="0"
+                                                     FontFamily="Segoe UI Light"
+                                                     HorizontalAlignment="Right"
+                                                     VerticalAlignment="Center"
+                                                     LineHeight="48"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <!-- Клавиатура калькулятора -->
+                            <Grid Grid.Row="1" Background="#1f282d" Margin="10,0,10,10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Первый ряд -->
+                                <UniformGrid Grid.Row="0" Columns="4" Rows="1">
+                                    <Button Content="C" Click="ClearButton_Click" Style="{StaticResource LightGrayButtonStyle}"
+                                            ToolTip="Очистить"/>
+                                    <Button Content="+/-" Click="NegateButton_Click" Style="{StaticResource LightGrayButtonStyle}"
+                                            ToolTip="Смена знака"/>
+                                    <Button Content="%" Click="AppendButton_Click" Style="{StaticResource LightGrayButtonStyle}"
+                                            ToolTip="Процент"/>
+                                    <Button Content="÷" Click="AppendButton_Click" Style="{StaticResource OperatorButtonStyle}"
+                                            ToolTip="Деление"/>
+                                </UniformGrid>
+
+                                <!-- Второй ряд -->
+                                <UniformGrid Grid.Row="1" Columns="4" Rows="1">
+                                    <Button Content="7" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="8" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="9" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="×" Click="AppendButton_Click" Style="{StaticResource OperatorButtonStyle}"
+                                            ToolTip="Умножение"/>
+                                </UniformGrid>
+
+                                <!-- Третий ряд -->
+                                <UniformGrid Grid.Row="2" Columns="4" Rows="1">
+                                    <Button Content="4" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="5" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="6" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="-" Click="AppendButton_Click" Style="{StaticResource OperatorButtonStyle}"
+                                            ToolTip="Вычитание"/>
+                                </UniformGrid>
+
+                                <!-- Четвертый ряд -->
+                                <UniformGrid Grid.Row="3" Columns="4" Rows="1">
+                                    <Button Content="1" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="2" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="3" Click="NumberButton_Click" Style="{StaticResource NumberButtonStyle}"/>
+                                    <Button Content="+" Click="AppendButton_Click" Style="{StaticResource OperatorButtonStyle}"
+                                            ToolTip="Сложение"/>
+                                </UniformGrid>
+
+                                <!-- Пятый ряд -->
+                                <Grid Grid.Row="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content="0" Grid.Column="0" Click="NumberButton_Click" 
+                                            Style="{StaticResource NumberButtonStyle}" HorizontalAlignment="Stretch"/>
+                                    <Button Content="." Grid.Column="1" Click="DecimalButton_Click" 
+                                            Style="{StaticResource LightGrayButtonStyle}" ToolTip="Точка"/>
+                                    <Button Content="=" Grid.Column="2" Click="EqualsButton_Click" 
+                                            Style="{StaticResource EqualButtonStyle}" ToolTip="Вычислить"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- ИНЖЕНЕРНЫЙ РЕЖИМ - ПРАВИЛЬНОЕ РАСПОЛОЖЕНИЕ -->
+                    <TabItem Header="Инженерный">
+                        <Grid Background="#1f282d">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="160"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Область дисплея -->
+                            <Border Grid.Row="0" Background="#151b1e" Padding="20" Margin="0,0,0,5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- История -->
+                                    <TextBlock x:Name="SciHistoryTextBlock" 
+                                             Grid.Row="0"
+                                             FontSize="16" 
+                                             Foreground="#7f8c8d" 
+                                             TextAlignment="Right"
+                                             HorizontalAlignment="Stretch"
+                                             VerticalAlignment="Bottom"
+                                             Margin="0,0,0,5"
+                                             Height="22"/>
+
+                                    <!-- Основной дисплей -->
+                                    <Border Grid.Row="1" 
+                                          Background="Transparent" 
+                                          BorderThickness="0"
+                                          Padding="0">
+                                        <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                                                    VerticalScrollBarVisibility="Disabled"
+                                                    VerticalAlignment="Center">
+                                            <TextBlock x:Name="SciDisplayTextBlock" 
+                                                     FontSize="36" 
+                                                     Foreground="#ecf0f1" 
+                                                     TextAlignment="Right"
+                                                     Text="0"
+                                                     FontFamily="Segoe UI Light"
+                                                     HorizontalAlignment="Right"
+                                                     VerticalAlignment="Center"
+                                                     LineHeight="36"/>
+                                        </ScrollViewer>
+                                    </Border>
+
+                                    <!-- Режим вычислений -->
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
+                                        <ToggleButton x:Name="DegreesToggle" 
+                                                    Content="DEG" 
+                                                    IsChecked="True"
+                                                    Style="{StaticResource RoundedToggleButtonStyle}"
+                                                    FontSize="13"
+                                                    Padding="0"
+                                                    ToolTip="Переключить режим градусы/радианы"/>
+                                        <TextBlock VerticalAlignment="Center" 
+                                                 Margin="10,0" 
+                                                 Foreground="#7f8c8d"
+                                                 FontSize="13"
+                                                 Text="{Binding ElementName=DegreesToggle, Path=IsChecked, 
+                                                        Converter={StaticResource BoolToDegRadConverter}}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Инженерная клавиатура - ПРАВИЛЬНОЕ РАСПОЛОЖЕНИЕ -->
+                            <Grid Grid.Row="1" Background="#1f282d" Margin="3,0,3,3">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Ряд 1: Тригонометрия -->
+                                <UniformGrid Grid.Row="0" Columns="6" Rows="1">
+                                    <Button Content="sin" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Синус"/>
+                                    <Button Content="cos" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Косинус"/>
+                                    <Button Content="tan" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Тангенс"/>
+                                    <Button Content="asin" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Арксинус"/>
+                                    <Button Content="acos" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Арккосинус"/>
+                                    <Button Content="atan" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Арктангенс"/>
+                                </UniformGrid>
+
+                                <!-- Ряд 2: Логарифмы и экспоненты -->
+                                <UniformGrid Grid.Row="1" Columns="6" Rows="1">
+                                    <Button Content="ln" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Натуральный логарифм"/>
+                                    <Button Content="log" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Десятичный логарифм"/>
+                                    <Button Content="e^x" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Экспонента"/>
+                                    <Button Content="10^x" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="10 в степени x"/>
+                                    <Button Content="π" Click="ConstantButton_Click" Style="{StaticResource SmallConstantButtonStyle}"
+                                            ToolTip="Число Пи"/>
+                                    <Button Content="e" Click="ConstantButton_Click" Style="{StaticResource SmallConstantButtonStyle}"
+                                            ToolTip="Число Эйлера"/>
+                                </UniformGrid>
+
+                                <!-- Ряд 3: Степени и корни -->
+                                <UniformGrid Grid.Row="2" Columns="6" Rows="1">
+                                    <Button Content="x²" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Квадрат числа"/>
+                                    <Button Content="x^y" Click="AppendButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Возведение в степень"/>
+                                    <Button Content="√x" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Квадратный корень"/>
+                                    <Button Content="∛x" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Кубический корень"/>
+                                    <Button Content="1/x" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Обратное число"/>
+                                    <Button Content="|x|" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Модуль числа"/>
+                                </UniformGrid>
+
+                                <!-- Ряд 4: Дополнительные функции -->
+                                <UniformGrid Grid.Row="3" Columns="6" Rows="1">
+                                    <Button Content="n!" Click="FunctionButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Факториал"/>
+                                    <Button Content="(" Click="AppendButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Открывающая скобка"/>
+                                    <Button Content=")" Click="AppendButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Закрывающая скобка"/>
+                                    <Button Content="C" Click="ClearButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Очистить"/>
+                                    <Button Content="⌫" Click="BackspaceButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Удалить символ"/>
+                                    <Button Content="%" Click="AppendButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Процент"/>
+                                </UniformGrid>
+
+                                <!-- Ряд 5: Первый ряд цифр и операции -->
+                                <UniformGrid Grid.Row="4" Columns="6" Rows="1">
+                                    <Button Content="7" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}"/>
+                                    <Button Content="8" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}"/>
+                                    <Button Content="9" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}"/>
+                                    <Button Content="÷" Click="AppendButton_Click" Style="{StaticResource SmallOperatorButtonStyle}"
+                                            ToolTip="Деление"/>
+                                    <Button Content="×" Click="AppendButton_Click" Style="{StaticResource SmallOperatorButtonStyle}"
+                                            ToolTip="Умножение"/>
+                                    <Button Content="+/-" Click="NegateButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Смена знака"/>
+                                </UniformGrid>
+
+                                <!-- Ряд 6: Второй ряд цифр и операции -->
+                                <UniformGrid Grid.Row="5" Columns="6" Rows="1">
+                                    <Button Content="4" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}"/>
+                                    <Button Content="5" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}"/>
+                                    <Button Content="6" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}"/>
+                                    <Button Content="-" Click="AppendButton_Click" Style="{StaticResource SmallOperatorButtonStyle}"
+                                            ToolTip="Вычитание"/>
+                                    <Button Content="+" Click="AppendButton_Click" Style="{StaticResource SmallOperatorButtonStyle}"
+                                            ToolTip="Сложение"/>
+                                    <Button Content="." Click="DecimalButton_Click" Style="{StaticResource SmallFunctionButtonStyle}"
+                                            ToolTip="Точка"/>
+                                </UniformGrid>
+
+                                <!-- Ряд 7: Третий ряд цифр -->
+                                <Grid Grid.Row="6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Button Content="1" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="0"/>
+                                    <Button Content="2" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="1"/>
+                                    <Button Content="3" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="2"/>
+                                    <Button Content="=" Click="EqualsButton_Click" Style="{StaticResource SmallEqualButtonStyle}"
+                                            ToolTip="Вычислить" Grid.Column="3" Grid.ColumnSpan="2"/>
+                                    <Button Content="=" Click="EqualsButton_Click" Style="{StaticResource SmallEqualButtonStyle}"
+                                            ToolTip="Вычислить" Grid.Column="5"/>
+                                </Grid>
+
+                                <!-- Ряд 8: Нулевая строка -->
+                                <Grid Grid.Row="7">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Button Content="0" Grid.Column="0" Click="NumberButton_Click" 
+                                            Style="{StaticResource SmallNumberButtonStyle}" HorizontalAlignment="Stretch"/>
+                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="1"/>
+                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="2"/>
+                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="3"/>
+                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="4"/>
+                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="5"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- РЕЖИМ ГРАФИКА -->
+                    <TabItem Header="График">
+                        <Grid Background="#1f282d">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Панель управления -->
+                            <Border Grid.Row="0" Background="#151b1e" Padding="15" CornerRadius="5" Margin="10,10,10,5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Верхняя строка: функция -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Text="y =" 
+                                                 Foreground="#ecf0f1" 
+                                                 VerticalAlignment="Center" 
+                                                 Margin="0,0,10,0"
+                                                 FontSize="14"/>
+                                        <TextBox Grid.Column="1"
+                                               x:Name="FunctionTextBox" 
+                                               Text="sin(x)" 
+                                               Height="35" 
+                                               Margin="0,0,15,0"
+                                               Style="{StaticResource RoundedTextBoxStyle}"
+                                               FontSize="13"
+                                               Foreground="#ecf0f1"/>
+                                        <Button Grid.Column="2"
+                                              Content="Построить" 
+                                              Click="PlotButton_Click" 
+                                              Height="35" 
+                                              Width="90"
+                                              Background="#3498db"
+                                              Foreground="#FFFFFF"
+                                              BorderThickness="0"
+                                              FontWeight="Bold"
+                                              FontSize="13"
+                                              Padding="10,0"
+                                              Cursor="Hand"
+                                              ToolTip="Построить график функции"/>
+                                    </Grid>
+
+                                    <!-- Нижняя строка: диапазон -->
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Text="X от:" 
+                                                 Foreground="#ecf0f1" 
+                                                 VerticalAlignment="Center" 
+                                                 Margin="0,0,5,0"
+                                                 FontSize="13"/>
+                                        <TextBox Grid.Column="1"
+                                               x:Name="XMinTextBox" 
+                                               Text="-10" 
+                                               Height="30" 
+                                               Margin="0,0,15,0"
+                                               Style="{StaticResource RoundedTextBoxStyle}"
+                                               TextAlignment="Center"
+                                               FontSize="13"
+                                               Foreground="#ecf0f1"/>
+
+                                        <TextBlock Grid.Column="2"
+                                                 Text="до:" 
+                                                 Foreground="#ecf0f1" 
+                                                 VerticalAlignment="Center" 
+                                                 Margin="0,0,5,0"
+                                                 FontSize="13"/>
+                                        <TextBox Grid.Column="3"
+                                               x:Name="XMaxTextBox" 
+                                               Text="10" 
+                                               Height="30" 
+                                               Margin="0,0,20,0"
+                                               Style="{StaticResource RoundedTextBoxStyle}"
+                                               TextAlignment="Center"
+                                               FontSize="13"
+                                               Foreground="#ecf0f1"/>
+
+                                        <TextBlock Grid.Column="4"
+                                                 Text="Примеры: sin(x), x^2, log(x), sqrt(x), 2*x+1" 
+                                                 Foreground="#7f8c8d" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 Margin="10,0,0,0"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <!-- Область графика -->
+                            <Border Grid.Row="1" 
+                                  BorderBrush="#2a363c" 
+                                  BorderThickness="1" 
+                                  Background="#151b1e" 
+                                  CornerRadius="5"
+                                  Margin="10,0,10,10">
+                                <Canvas x:Name="GraphCanvas" Background="#151b1e">
+                                    <TextBlock x:Name="GraphPlaceholder" 
+                                             Text="Введите функцию и нажмите 'Построить'" 
+                                             HorizontalAlignment="Center" 
+                                             VerticalAlignment="Center"
+                                             Foreground="#7f8c8d" 
+                                             TextAlignment="Center"
+                                             FontSize="14"
+                                             FontWeight="Light"/>
+                                </Canvas>
+                            </Border>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
