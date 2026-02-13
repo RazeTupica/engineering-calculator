@@ -665,8 +665,6 @@
                                     <Button Content="2" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="1"/>
                                     <Button Content="3" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="2"/>
                                     <Button Content="=" Click="EqualsButton_Click" Style="{StaticResource SmallEqualButtonStyle}"
-                                            ToolTip="Вычислить" Grid.Column="3" Grid.ColumnSpan="2"/>
-                                    <Button Content="=" Click="EqualsButton_Click" Style="{StaticResource SmallEqualButtonStyle}"
                                             ToolTip="Вычислить" Grid.Column="5"/>
                                 </Grid>
 
@@ -683,11 +681,6 @@
                                     
                                     <Button Content="0" Grid.Column="0" Click="NumberButton_Click" 
                                             Style="{StaticResource SmallNumberButtonStyle}" HorizontalAlignment="Stretch"/>
-                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="1"/>
-                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="2"/>
-                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="3"/>
-                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="4"/>
-                                    <Button Content="0" Click="NumberButton_Click" Style="{StaticResource SmallNumberButtonStyle}" Grid.Column="5"/>
                                 </Grid>
                             </Grid>
                         </Grid>
