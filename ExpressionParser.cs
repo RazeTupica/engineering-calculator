@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace EngineeringCalculator
@@ -14,8 +12,9 @@ namespace EngineeringCalculator
             { "*", 2 }, { "/", 2 },
             { "^", 3 },
             { "!", 4 },
-            { "sin", 5 }, { "cos", 5 }, { "tan", 5 },
-            { "asin", 5 }, { "acos", 5 },
+            { "sin", 5 }, { "cos", 5 }, { "tan", 5 }, { "cot", 5 }, { "ctg", 5 },
+            { "asin", 5 }, { "acos", 5 }, { "atan", 5 }, { "acot", 5 }, { "actg", 5 },
+            { "sinh", 5 }, { "cosh", 5 }, { "tanh", 5 },
             { "ln", 5 }, { "log", 5 },
             { "sqrt", 5 }, { "abs", 5 }, { "exp", 5 }, { "10^", 5 }
         };
@@ -266,8 +265,14 @@ namespace EngineeringCalculator
                 "sin" => CalculatorEngine.Sin(a, degreesMode),
                 "cos" => CalculatorEngine.Cos(a, degreesMode),
                 "tan" => CalculatorEngine.Tan(a, degreesMode),
+                "cot" or "ctg" => CalculatorEngine.Cot(a, degreesMode),
                 "asin" => CalculatorEngine.Asin(a, degreesMode),
                 "acos" => CalculatorEngine.Acos(a, degreesMode),
+                "atan" => CalculatorEngine.Atan(a, degreesMode),
+                "acot" or "actg" => CalculatorEngine.Acot(a, degreesMode),
+                "sinh" => CalculatorEngine.Sinh(a),
+                "cosh" => CalculatorEngine.Cosh(a),
+                "tanh" => CalculatorEngine.Tanh(a),
                 "ln" => CalculatorEngine.Ln(a),
                 "log" => CalculatorEngine.Log10(a),
                 "sqrt" => CalculatorEngine.Sqrt(a),
@@ -290,8 +295,11 @@ namespace EngineeringCalculator
         private bool IsFunction(string token)
         {
             return token == "sin" || token == "cos" || token == "tan" ||
+                   token == "cot" || token == "ctg" ||
                    token == "ln" || token == "log" || token == "sqrt" ||
                    token == "abs" || token == "asin" || token == "acos" ||
+                   token == "atan" || token == "acot" || token == "actg" ||
+                   token == "sinh" || token == "cosh" || token == "tanh" ||
                    token == "exp" || token == "10^";
         }
 

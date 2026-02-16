@@ -99,5 +99,52 @@ namespace EngineeringCalculator
                 result *= i;
             return result;
         }
+        // Котангенс
+        public static double Cot(double x, bool inDegrees = true)
+        {
+            double rad = inDegrees ? ToRadians(x) : x;
+            double tan = Math.Tan(rad);
+            if (Math.Abs(tan) < 1e-15)
+                throw new ArgumentException("Котангенс не определен для данного угла.");
+            return 1 / tan;
+        }
+
+        // Арктангенс
+        public static double Atan(double x, bool inDegrees = true)
+        {
+            double result = Math.Atan(x);
+            return inDegrees ? result * 180 / PI : result;
+        }
+
+        // Арккотангенс
+        public static double Acot(double x, bool inDegrees = true)
+        {
+            double result = Math.Atan(1 / x);
+            return inDegrees ? result * 180 / PI : result;
+        }
+
+        // Гиперболические функции
+        public static double Sinh(double x) => Math.Sinh(x);
+        public static double Cosh(double x) => Math.Cosh(x);
+        public static double Tanh(double x) => Math.Tanh(x);
+
+        // Секанс и косеканс (если нужны)
+        public static double Sec(double x, bool inDegrees = true)
+        {
+            double rad = inDegrees ? ToRadians(x) : x;
+            double cos = Math.Cos(rad);
+            if (Math.Abs(cos) < 1e-15)
+                throw new ArgumentException("Секанс не определен для данного угла.");
+            return 1 / cos;
+        }
+
+        public static double Csc(double x, bool inDegrees = true)
+        {
+            double rad = inDegrees ? ToRadians(x) : x;
+            double sin = Math.Sin(rad);
+            if (Math.Abs(sin) < 1e-15)
+                throw new ArgumentException("Косеканс не определен для данного угла.");
+            return 1 / sin;
+        }
     }
 }
